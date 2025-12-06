@@ -36,9 +36,9 @@ $ npm run test:cov
 
 ## following NestJs youtube [course](https://www.youtube.com/watch?v=D46R2cykFt0&t=1411s)
 
-## installas
+## install
 
-````bash
+```bash
 npm i --save class-validator class-transformer
 npm install --save @nestjs/typeorm typeorm pg
 npm i @nestjs/mapped-types
@@ -48,6 +48,14 @@ npm i bcrypt
 npm i -D @types/bcrypt
 npm install --save @nestjs/passport passport passport-local
 npm install --save-dev @types/passport-local
+npm i @nestjs/jwt passport-jwt
+npm i -D @types/passport-jwt
+```
+
+- generate JWT secret:
+
+```bash
+openssl rand -hex 32
 ```
 
 - `Validation Pipe`
@@ -56,7 +64,7 @@ npm install --save-dev @types/passport-local
 
 ```ts
 new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true });
-````
+```
 
 - to differentiate application of the `ValidationPipe` set in the DTO, use `groups`
 
