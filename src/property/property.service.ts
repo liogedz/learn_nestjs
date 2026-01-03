@@ -12,6 +12,7 @@ export class PropertyService {
   constructor(
     @InjectRepository(Property) private propertyRepo: Repository<Property>,
   ) {}
+
   async findAll(paginationDTO: PaginationDto) {
     return await this.propertyRepo.find({
       skip: paginationDTO.skip,

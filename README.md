@@ -58,7 +58,8 @@ npm i -D @types/passport-jwt
 openssl rand -hex 32
 ```
 
-- `Validation Pipe`
+## `Validation Pipe`
+
 - in Controller (@Body())
 - not allow non-DTO fields in the `body`
 
@@ -135,7 +136,8 @@ providers: [
   ],
 ```
 
-- `Custom transformPipe`
+## `Custom transformPipe`
+
 - create file `property/pipes/parseIdPipe.ts
 - mark as `@Injectable()` if used outside of module.
 
@@ -156,7 +158,8 @@ export class ParseIdPipe implements PipeTransform<string, number> {
 }
 ```
 
-- `Custom Decorator for RequestHeaders`
+## `Custom Decorator for RequestHeaders`
+
 - create file in dto/headres.dto.ts
 
 ```ts
@@ -215,7 +218,8 @@ export const RequestHeaders = createParamDecorator(
   }
 ```
 
-- `type ORM`
+## `type ORM`
+
 - install dependencies
 
 ```ts
@@ -277,14 +281,16 @@ export class Property {
   ) {}
 ```
 
-- `seeding` with `@faker-js/faker`
+## `seeding` with `@faker-js/faker`
+
 - import dependency
 - create factories for entiies in `seeding` folder
 - logic for seeding in [main.seeder.ts](src/seeding/main.seeder.ts)
 - add `"seed": "ts-node src/seeding/seed.ts"` to package.json "scripts"
 - [seed.ts](src/seeding/seed.ts) for startup seeding proces `npm run seed`
 
-- `Manage Environment`
+## `Manage Environment`
+
 - install configuration module
 - set imports in app.module.ts to
 
@@ -293,7 +299,7 @@ export class Property {
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      load: [dbConfig, dbConfigProduction],
+      load: [dbConfig, dbConfigProduction],// for loading configuration from factory function
     }),
     PropertyModule,
     TypeOrmModule.forRootAsync({
@@ -303,16 +309,19 @@ export class Property {
   ],
 ```
 
-- may read such things now in `.env`:
+- may use expansion variables in `.env` now:
 
 ```ts
 dbName=database
 url=${dbName}.example.com
 ```
 
-- create src/config/db.config.ts
+- redo db-config.ts in root to src/config/db.config.ts
 - and src/config/db.config.production.ts (with `synchronize: false`,)
 - create factory function instead
+- delete previously created dbConfig in root
+- chnage path for entities in factory function as config now in `src`
+- import \* as path from "path" module for using path in factory function
 
 ```ts
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
@@ -322,13 +331,55 @@ export default (): PostgresConnectionOptions => ({
   url: process.env.url,
   type: 'postgres',
   port: Number(process.env.port),
-  entities: [path.resolve(__dirname, '..') + '/**/*.entity{.ts,.js}'], //will find all entities in the entities folder
+  entities: [path.resolve(__dirname, '..') + '/**/*.entity{.ts,.js}'], //will match all entities in the entities folder
   synchronize: true,
 });
 ```
 
--`Authentication`
+## `Authentication`
 
 ```bash
 nest g res user
 ```
+
+## `Pagination`
+
+- pass to findAll two params `skip` & `limit`, create DTO for that and set `DEFAULT_PAGE_SIZE` in constatnts
+
+```ts
+  async findAll(paginationDTO: PaginationDto) {
+    return await this.propertyRepo.find({
+      skip: paginationDTO.skip,
+      take: paginationDTO.limit ?? DEFAULT_PAGE_SIZE,
+    });
+  }
+    @Get()
+  findAll(@Query() paginationDTO: PaginationDto) {
+    return this.propertyService.findAll(paginationDTO);
+  }
+```
+
+- `skip` from which record to fetch
+- `limit` how many entries to display
+
+## Hashing
+
+- create `User` resource
+- inject User repo to service:
+
+```ts
+constructor(@InjectRepository(User) private UserRepo: Repository<User>) {}
+```
+
+- clear user table as we're adding `password` column to it
+- install bcrypt
+- db has trigger before entering value, allowing to hash password
+
+```ts
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+  }
+```
+
+- important to create user first and then save it to DB in `service` with repositoryotherwise beforeInsert trigger won't work

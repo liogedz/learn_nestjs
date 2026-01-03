@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Property } from './property.entity';
 import * as bcrypt from 'bcrypt';
+import { SALT_ROUNDS } from 'src/utils/constants';
 
 @Entity()
 export class User {
@@ -43,6 +44,6 @@ export class User {
 
   @BeforeInsert()
   async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
   }
 }

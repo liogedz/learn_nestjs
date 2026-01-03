@@ -1,6 +1,6 @@
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 import * as path from 'path';
-
+//Postgress factory function, returning the configuration object
 export default (): PostgresConnectionOptions => ({
   url: process.env.url,
   type: 'postgres',
